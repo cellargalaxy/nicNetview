@@ -1,0 +1,35 @@
+body {
+    background-image: url('/netview/image/blueBackground.jpg');
+    background-size: 100%;
+    background-repeat: no-repeat;
+}
+
+table {
+    text-align: center;
+    width: 100%;
+}
+
+.buildingName {
+    color: blue;
+    text-decoration: underline;
+}
+
+.connTr {
+    background-color: lightgreen;
+}
+
+.notConnTr {
+    background-color: lightcoral;
+}
+
+.conn {
+    float: left;
+    margin: 5px;
+    background-color: lawngreen;
+}
+
+.notConn {
+    float: left;
+    margin: 5px;
+    background-color: orangered;
+}

@@ -1,0 +1,35 @@
+<!DOCTYPE web-app PUBLIC
+        "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+        "http://java.sun.com/dtd/web-app_2_3.dtd" >
+
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+         version="3.1">
+  <display-name>Archetype Created Web Application</display-name>
+
+  <!-- netviewListenerStart============================================================================================= -->
+  <listener>
+    <listener-class>control.NetviewListener</listener-class>
+  </listener>
+  <!-- netviewListenerStart============================================================================================= -->
+
+  <servlet>
+    <servlet-name>netviewServlet</servlet-name>
+    <servlet-class>control.NetviewServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>netviewServlet</servlet-name>
+    <url-pattern></url-pattern>
+  </servlet-mapping>
+
+  <servlet>
+    <servlet-name>netviewJsonServlet</servlet-name>
+    <servlet-class>control.NetviewJsonServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>netviewJsonServlet</servlet-name>
+    <url-pattern>/json</url-pattern>
+  </servlet-mapping>
+
+</web-app>
