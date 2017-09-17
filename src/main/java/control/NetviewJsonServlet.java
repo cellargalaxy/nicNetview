@@ -1,7 +1,7 @@
 package control;
 
 import org.json.JSONObject;
-import service.Netview;
+import service.NetviewThread;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -33,9 +33,9 @@ public class NetviewJsonServlet extends HttpServlet {
 		JSONObject jsonObject = new JSONObject();
 		jsonObject.put("address", address);
 		if (address != null && building != null && floor != null && model != null) {
-			Netview netview = Netview.getNETVIEW();
+			NetviewThread netviewThread = NetviewThread.getNETVIEW();
 			try {
-				jsonObject.put("result", netview.addHost(address, building, floor, model, name));
+				jsonObject.put("result", netviewThread.addHost(address, building, floor, model, name));
 			} catch (Exception e) {
 				jsonObject.put("result", false);
 			}
@@ -62,8 +62,8 @@ public class NetviewJsonServlet extends HttpServlet {
 		String address = req.getParameter("address");
 		JSONObject jsonObject = new JSONObject();
 		if (address != null) {
-			Netview netview = Netview.getNETVIEW();
-			jsonObject.put("result", netview.deleteHost(address));
+			NetviewThread netviewThread = NetviewThread.getNETVIEW();
+			jsonObject.put("result", netviewThread.deleteHost(address));
 		} else {
 			jsonObject.put("result", false);
 		}

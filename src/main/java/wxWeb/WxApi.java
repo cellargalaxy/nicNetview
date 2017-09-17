@@ -2,62 +2,80 @@ package wxWeb;
 
 import configuration.WxConfiguration;
 import org.apache.log4j.Logger;
+import org.json.JSONArray;
+
+import java.util.concurrent.CountDownLatch;
 
 /**
  * Created by cellargalaxy on 17-9-16.
  */
-public class WxApi {
-	private static final Logger LOGGER = Logger.getLogger(NetviewTemplateSendRunable.class.getName());
-	private final String appID= WxConfiguration.getAppID();
-	private final String appsecret=WxConfiguration.getAppsecret();
-	private String access_token;
+public class WxApi extends Thread{
+	private static final Logger LOGGER = Logger.getLogger(WxApi.class.getName());
+	private final CountDownLatch countDownLatch;
+	private final FlushStatusRunnable[] flushStatusRunnables;
+	private volatile String access_token;
+	private volatile JSONArray openIds;
 	
-	private AccessTokenGetRunnable accessTokenGetRunnable;
-	private NetviewTemplateSendRunable netviewTemplateSendRunable;
+	private boolean runable;
 	
-	private final static WxApi WX_API=new WxApi();
-	
-	public static WxApi getWxApi() {
+	private static WxApi WX_API;
+	public static WxApi createWxApi(FlushStatusRunnable[] flushStatusRunnables) {
+		if (WX_API==null||flushStatusRunnables!=null) {
+			WX_API=new WxApi(flushStatusRunnables);
+		}
 		return WX_API;
 	}
-	
-	public static void main(String[] args) {
-		WxApi.getWxApi().start();
+	private WxApi(FlushStatusRunnable[] flushStatusRunnables) {
+		this.flushStatusRunnables = flushStatusRunnables;
+		countDownLatch=new CountDownLatch(1);
+		runable=true;
+		LOGGER.info("初始化微信公众号主类");
 	}
 	
-	private WxApi() {
+	@Override
+	public void interrupt() {
+		runable=false;
+		super.interrupt();
 	}
 	
-	public void start(){
-		accessTokenGetRunnable =new AccessTokenGetRunnable(this);
-		accessTokenGetRunnable.getAccessToken();
-		netviewTemplateSendRunable=new NetviewTemplateSendRunable(this,"BxdhCUvfr2m7OTwws6wmh75p1REXTTwyLqo0L1_GS10","http://119.29.171.44:8080/nic/");
-		new Thread(accessTokenGetRunnable,"获取access_token线程").start();
-		new Thread(netviewTemplateSendRunable,"发送模板线程").start();
-	}
-	
-	public void stop(){
-		accessTokenGetRunnable.stop();
-		netviewTemplateSendRunable.stop();
-	}
-	
-	public String getAppID() {
-		return appID;
-	}
-	
-	public String getAppsecret() {
-		return appsecret;
+	@Override
+	public void run() {
+		for (FlushStatusRunnable flushStatusRunnable : flushStatusRunnables) {
+			flushStatusRunnable.setWxApi(this);
+		}
+		for (FlushStatusRunnable flushStatusRunnable : flushStatusRunnables) {
+			flushStatusRunnable.run();
+		}
+		countDownLatch.countDown();
+		while (runable) {
+			try {
+				Thread.sleep(WxConfiguration.getFlushTime());
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			for (FlushStatusRunnable flushStatusRunnable : flushStatusRunnables) {
+				flushStatusRunnable.run();
+			}
+		}
 	}
 	
 	public String getAccess_token() {
-		synchronized (access_token){
-			return access_token;
-		}
+		return access_token;
 	}
 	
 	public void setAccess_token(String access_token) {
-		synchronized (access_token){
-			this.access_token = access_token;
-		}
+		this.access_token = access_token;
+	}
+	
+	public JSONArray getOpenIds() {
+		return openIds;
+	}
+	
+	public void setOpenIds(JSONArray openIds) {
+		this.openIds = openIds;
+	}
+	
+	public CountDownLatch getCountDownLatch() {
+		return countDownLatch;
 	}
 }

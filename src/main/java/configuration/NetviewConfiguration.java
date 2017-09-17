@@ -10,8 +10,6 @@ public class NetviewConfiguration {
 	private static int pingWaitTime;
 	private static String ipTableName;
 	
-	
-	
 	static {
 		pingTimes=4;
 		pingTimeOut = 1500;

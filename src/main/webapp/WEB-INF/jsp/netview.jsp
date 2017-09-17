@@ -27,7 +27,7 @@
     </form>
 </h5>
 
-<%--<c:if test="${youNicer!=null&&youNicer.status==youNicer.adminStatus}">--%>
+<c:if test="${youNicer!=null&&youNicer.status==youNicer.adminStatus}">
 <h5>
     ip：<input type="text" name="address" placeholder="127.0.0.1">
     楼栋：<input type="text" name="building" placeholder="A1">
@@ -45,7 +45,7 @@
         <a href="/netview/file/ip.xls"> excel模板</a>
     </form>
 </h5>
-<%--</c:if>--%>
+</c:if>
 
 
 
@@ -54,14 +54,14 @@
     <table name="${building.buildingName}">
         <tr>
             <td>地址</td>
-                <%--<c:if test="${youNicer!=null&&youNicer.status==youNicer.adminStatus}">--%>
+                <c:if test="${youNicer!=null&&youNicer.status==youNicer.adminStatus}">
             <td>ip</td>
-                <%--</c:if>--%>
+                </c:if>
             <td>延时</td>
             <td>日期</td>
-                <%--<c:if test="${youNicer!=null&&youNicer.status==youNicer.adminStatus}">--%>
+                <c:if test="${youNicer!=null&&youNicer.status==youNicer.adminStatus}">
             <td>删除</td>
-                <%--</c:if>--%>
+                </c:if>
         </tr>
         <c:forEach var="host" items="${building.hosts}">
             <c:if test="${host.conn}">
@@ -78,9 +78,9 @@
                 <td>${host.building}-${host.floor}-${host.model}-${host.name}</td>
             </c:if>
 
-            <%--<c:if test="${youNicer!=null&&youNicer.status==youNicer.adminStatus}">--%>
+            <c:if test="${youNicer!=null&&youNicer.status==youNicer.adminStatus}">
             <td>${host.address}</td>
-            <%--</c:if>--%>
+            </c:if>
 
             <td>
                 <c:forEach var="result" items="${host.results}">
@@ -104,9 +104,9 @@
                 </c:if>
             </td>
 
-            <%--<c:if test="${youNicer!=null&&youNicer.status==youNicer.adminStatus}">--%>
+            <c:if test="${youNicer!=null&&youNicer.status==youNicer.adminStatus}">
                 <td><a href="" onclick="deleteHost('${host.address}')">删除</a></td>
-            <%--</c:if>--%>
+            </c:if>
             </tr>
         </c:forEach>
     </table>

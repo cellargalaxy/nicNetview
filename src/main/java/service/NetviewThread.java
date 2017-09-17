@@ -4,11 +4,11 @@ import bean.Building;
 import bean.Host;
 import bean.NetviewLog;
 import bean.PingResult;
+import configuration.NetviewConfiguration;
 import dao.Sql;
 import org.apache.log4j.Logger;
 import ping.Ping;
 import ping.PingImpl;
-import ping.PingRunnable;
 
 import java.io.File;
 import java.util.*;
@@ -16,25 +16,26 @@ import java.util.*;
 /**
  * Created by cellargalaxy on 17-9-16.
  */
-public class Netview {
-	private static final Logger LOGGER = Logger.getLogger(Netview.class.getName());
+public class NetviewThread extends Thread{
+	private static final Logger LOGGER = Logger.getLogger(NetviewThread.class.getName());
+	private final Ping ping;
+	private boolean runable;
 	private final List<Host> hosts;
-	private final PingRunnable pingRunnable;
 	private final ExcelReadHost excelReadHost;
 	private final List<NetviewLog> netviewLogs;
 	
-	private static final Netview NETVIEW=new Netview(new PingImpl(),new ExcelReadHostImpl());
-	
-	public static void main(String[] args) {
-		Netview netview=Netview.getNETVIEW();
-		netview.startNetview();
+	private static final NetviewThread NETVIEW_THREAD =new NetviewThread(new PingImpl(),new ExcelReadHostImpl());
+	public static NetviewThread getNETVIEW() {
+		return NETVIEW_THREAD;
 	}
 	
-	private Netview(Ping ping,ExcelReadHost excelReadHost) {
+	
+	private NetviewThread(Ping ping, ExcelReadHost excelReadHost) {
+		this.ping=ping;
 		this.excelReadHost=excelReadHost;
+		runable=true;
 		hosts= Sql.findAllHosts();
 		sortHost();
-		pingRunnable=new PingRunnable(this,ping);
 		netviewLogs=new LinkedList<NetviewLog>();
 		LOGGER.info("初始化监控主类");
 	}
@@ -50,16 +51,29 @@ public class Netview {
 		}
 	}
 	
-	public void startNetview(){
-		pingRunnable.startAble();
-		new Thread(pingRunnable,"nicNetview线程").start();
-		LOGGER.info("启动ping线程");
+	@Override
+	public void interrupt() {
+		runable=false;
+		super.interrupt();
 	}
 	
-	public void stopNetview(){
-		pingRunnable.stopAble();
-		LOGGER.info("停止ping线程");
+	@Override
+	public void run() {
+		while (runable) {
+			Host[] hosts= createPingHosts();
+			PingResult[] pingResults=ping.pings(hosts);
+			for (int i = 0; i < pingResults.length; i++) {
+				addPingResult(hosts[i],pingResults[i]);
+			}
+			LOGGER.info("ping完一次");
+			try {
+				Thread.sleep(NetviewConfiguration.getPingWaitTime());
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
 	}
+	
 	public boolean addHost(String address, String building, String floor, String model, String name) {
 		Host host = new Host(address, building, floor, model, name);
 		return addHost(host);
@@ -93,7 +107,6 @@ public class Netview {
 			return building;
 		}
 	}
-	
 	
 	public boolean deleteHost(String address) {
 		if (Sql.delleteAddress(address)) {
@@ -157,6 +170,7 @@ public class Netview {
 		}
 		return buildings;
 	}
+	
 	public Host[] createPingHosts(){
 		Host[] pingHosts=new Host[hosts.size()];
 		int i=0;
@@ -172,12 +186,8 @@ public class Netview {
 			synchronized (netviewLogs){
 				netviewLogs.add(new NetviewLog(host,host.isConn(),pingResult.getDate()));
 			}
-			LOGGER.info(host.isConn()+" "+host.getFullName());
+			LOGGER.info("交换机状态改变："+host.isConn()+" "+host.getFullName());
 		}
-	}
-	
-	public static Netview getNETVIEW() {
-		return NETVIEW;
 	}
 	
 	public List<NetviewLog> getNetviewLogs() {

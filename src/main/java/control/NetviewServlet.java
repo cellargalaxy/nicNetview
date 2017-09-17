@@ -5,7 +5,7 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.json.JSONObject;
-import service.Netview;
+import service.NetviewThread;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -23,14 +23,14 @@ public class NetviewServlet extends HttpServlet {
 	
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		Netview netview = Netview.getNETVIEW();
+		NetviewThread netviewThread = NetviewThread.getNETVIEW();
 		String demandKey = req.getParameter("demandKey");
 		if (demandKey == null) {
-			LinkedList<Building> buildings = netview.createAllBuilding();
-			buildings.addFirst(netview.createOutTimeBuilding());
+			LinkedList<Building> buildings = netviewThread.createAllBuilding();
+			buildings.addFirst(netviewThread.createOutTimeBuilding());
 			req.setAttribute("buildings", buildings);
 		} else {
-			req.setAttribute("buildings", new Building[]{netview.createDemandKeyBuilding(demandKey)});
+			req.setAttribute("buildings", new Building[]{netviewThread.createDemandKeyBuilding(demandKey)});
 		}
 		req.getRequestDispatcher(NETVIEW_JSP).forward(req, resp);
 	}
@@ -92,8 +92,8 @@ public class NetviewServlet extends HttpServlet {
 			}
 		}
 		
-		Netview netview = Netview.getNETVIEW();
-		req.setAttribute("buildings", new Building[]{netview.addHosts(ipFile)});
+		NetviewThread netviewThread = NetviewThread.getNETVIEW();
+		req.setAttribute("buildings", new Building[]{netviewThread.addHosts(ipFile)});
 		ipFile.delete();
 		req.getRequestDispatcher(NETVIEW_JSP).forward(req, resp);
 	}
@@ -109,9 +109,9 @@ public class NetviewServlet extends HttpServlet {
 		jsonObject.put("address", address);
 		System.out.println(address+building+floor+model+name);
 		if (address != null && building != null && floor != null && model != null) {
-			Netview netview = Netview.getNETVIEW();
+			NetviewThread netviewThread = NetviewThread.getNETVIEW();
 			try {
-				jsonObject.put("result", netview.addHost(address, building, floor, model, name));
+				jsonObject.put("result", netviewThread.addHost(address, building, floor, model, name));
 			} catch (Exception e) {
 				jsonObject.put("result", false);
 			}
@@ -130,8 +130,8 @@ public class NetviewServlet extends HttpServlet {
 		String address = req.getParameter("address");
 		JSONObject jsonObject = new JSONObject();
 		if (address != null) {
-			Netview netview = Netview.getNETVIEW();
-			jsonObject.put("result", netview.deleteHost(address));
+			NetviewThread netviewThread = NetviewThread.getNETVIEW();
+			jsonObject.put("result", netviewThread.deleteHost(address));
 		} else {
 			jsonObject.put("result", false);
 		}

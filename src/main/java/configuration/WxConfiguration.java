@@ -7,17 +7,19 @@ public class WxConfiguration {
 	private static String appID;
 	private static String appsecret;
 	private static String accessTokenUrl;
-	private static int flushAccessTokenTime;
-	private static String templateUrl;
 	private static String openIdUrl;
+	private static int flushTime;
+	private static String templateUrl;
+	private static int templateSendTime;
 	
 	static {
 		appID="";
 		appsecret="";
 		accessTokenUrl="https://api.weixin.qq.com/cgi-bin/token";
-		flushAccessTokenTime=1000*60*60;
-		templateUrl="https://api.weixin.qq.com/cgi-bin/message/template/send";
 		openIdUrl="https://api.weixin.qq.com/cgi-bin/user/get";
+		flushTime=1000*60*60;
+		templateUrl="https://api.weixin.qq.com/cgi-bin/message/template/send";
+		templateSendTime=1000*5;
 	}
 	
 	public static String getAppID() {
@@ -44,12 +46,20 @@ public class WxConfiguration {
 		WxConfiguration.accessTokenUrl = accessTokenUrl;
 	}
 	
-	public static int getFlushAccessTokenTime() {
-		return flushAccessTokenTime;
+	public static String getOpenIdUrl() {
+		return openIdUrl;
 	}
 	
-	public static void setFlushAccessTokenTime(int flushAccessTokenTime) {
-		WxConfiguration.flushAccessTokenTime = flushAccessTokenTime;
+	public static void setOpenIdUrl(String openIdUrl) {
+		WxConfiguration.openIdUrl = openIdUrl;
+	}
+	
+	public static int getFlushTime() {
+		return flushTime;
+	}
+	
+	public static void setFlushTime(int flushTime) {
+		WxConfiguration.flushTime = flushTime;
 	}
 	
 	public static String getTemplateUrl() {
@@ -60,11 +70,11 @@ public class WxConfiguration {
 		WxConfiguration.templateUrl = templateUrl;
 	}
 	
-	public static String getOpenIdUrl() {
-		return openIdUrl;
+	public static int getTemplateSendTime() {
+		return templateSendTime;
 	}
 	
-	public static void setOpenIdUrl(String openIdUrl) {
-		WxConfiguration.openIdUrl = openIdUrl;
+	public static void setTemplateSendTime(int templateSendTime) {
+		WxConfiguration.templateSendTime = templateSendTime;
 	}
 }

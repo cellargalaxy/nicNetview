@@ -8,6 +8,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -16,52 +17,35 @@ import java.io.IOException;
 /**
  * Created by cellargalaxy on 17-9-16.
  */
-public class OpenidGet {
-	private final WxApi wxApi;
+public class OpenidGet extends FlushStatusRunnable{
+	private static final Logger LOGGER = Logger.getLogger(OpenidGet.class.getName());
+	private String openIdUrl;
 	private final CloseableHttpClient client;
-	private final HttpGet httpGet;
-	private final String openIdUrl;
+	private HttpGet httpGet;
 	
-	public OpenidGet(WxApi wxApi) {
-		this.wxApi = wxApi;
+	public OpenidGet() {
 		client = HttpClients.createDefault();
-		openIdUrl= WxConfiguration.getOpenIdUrl()+"?access_token="+wxApi.getAccess_token();
-		httpGet=new HttpGet(openIdUrl);
 	}
 	
-	public static void main(String[] args) throws IOException {
-		HttpResponse httpResponse = HttpClients.createDefault().execute(new HttpGet(WxConfiguration.getOpenIdUrl()+"?access_token=waLbalZnAFENsr0Y1ppTUUHo7I3929rdOFrLeQhYABSq0UXe4RupBXf3jheRCXrPod0Cxk1LPEEAZ6dr4CcWBXdJcCS4iUUefteggLKmtDcJRWdACAYGL"));
-		if(httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-			HttpEntity entity = httpResponse.getEntity();
-			String result = EntityUtils.toString(entity);
-			JSONObject jsonObject = new JSONObject(result);
-			if (jsonObject.get("data") != null) {
-				for (Object o : jsonObject.getJSONObject("data").getJSONArray("openid")) {
-					System.out.println(o);
-				}
-			} else {
-				System.out.println("///////");
-			}
-		}
-	}
-	
-	public JSONArray getOpenIds(){
+	public void run() {
 		try{
+			openIdUrl= WxConfiguration.getOpenIdUrl()+"?access_token="+getWxApi().getAccess_token();
+			httpGet=new HttpGet(openIdUrl);
 			HttpResponse httpResponse = client.execute(httpGet);
 			if(httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK){
 				HttpEntity entity = httpResponse.getEntity();
 				String result = EntityUtils.toString(entity);
 				JSONObject jsonObject=new JSONObject(result);
 				if (jsonObject.get("data")!=null) {
-					return jsonObject.getJSONObject("data").getJSONArray("openid");
+					getWxApi().setOpenIds(jsonObject.getJSONObject("data").getJSONArray("openid"));
+					LOGGER.info("成功获取openId，关注人数："+jsonObject.get("total"));
 				}else {
-					return new JSONArray();
+					LOGGER.info("失败获取openId："+jsonObject);
 				}
 			}
-			return new JSONArray();
 		}catch (Exception e){
 			e.printStackTrace();
-			return new JSONArray();
+			LOGGER.info("失败获取openId");
 		}
 	}
 }
